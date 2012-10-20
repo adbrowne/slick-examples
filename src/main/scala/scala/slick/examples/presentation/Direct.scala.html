@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>~/scala/slick-examples/src/main/scala/scala/slick/examples/presentation/Direct.scala.html</title>
+<meta name="Generator" content="Vim/7.3">
+<meta name="plugin-version" content="vim7.3_v6">
+<meta name="syntax" content="scala">
+<meta name="settings" content="use_css">
+<style type="text/css">
+<!--
+pre { font-family: monospace; color: #000000; background-color: #ffffff; }
+body { font-family: monospace; color: #000000; background-color: #ffffff; }
+.Type { color: #008000; }
+.Constant { color: #c00000; }
+.Special { color: #c000c0; }
+.Statement { color: #af5f00; }
+.Comment { color: #0000c0; }
+.PreProc { color: #c000c0; }
+-->
+</style>
+</head>
+<body>
+<pre>
+<span class="PreProc">package</span> scala.slick.example.presentation
+
+<span class="Comment">// Use H2Driver to connect to an H2 database</span>
+<span class="Comment">// Use H2Driver to connect to an H2 database</span>
+<span class="PreProc">import</span> scala.slick.driver.H2Driver.simple._
+
+<span class="Comment">// Use the implicit threadLocalSession</span>
+<span class="PreProc">import</span> Database.threadLocalSession
+
+<span class="PreProc">import</span> scala.slick.direct._
+
+<span class="Comment">// Use the implicit threadLocalSession</span>
+<span class="PreProc">import</span> Database.threadLocalSession
+<span class="PreProc">import</span> scala.slick.direct.AnnotationMapper._
+
+<span class="Statement">object</span> <span class="Special">Direct</span> <span class="Statement">extends</span> <span class="Special">App</span> {
+
+    @table(<span class="Constant">&quot;TrainTrips&quot;</span>)
+    <span class="Statement">case</span> <span class="Statement">class</span> <span class="Special">TrainTrip</span>(
+        @column(<span class="Constant">&quot;NAME&quot;</span>) name:<span class="Type"> String</span>,
+        @column(<span class="Constant">&quot;PRICE&quot;</span>) price:<span class="Type"> Double</span>,
+        @column(<span class="Constant">&quot;FK_COUNTRY_ID&quot;</span>) countryID:<span class="Type"> Int</span>
+    )
+
+    Database.forURL(<span class="Constant">&quot;jdbc:h2:mem:test1;TRACE_LEVEL_FILE=4&quot;</span>, driver = <span class="Constant">&quot;org.h2.Driver&quot;</span>) withSession {
+
+        scala.slick.examples.presentation.Helper.createDb
+
+        <span class="Statement">val</span> trips = <span class="Special">Queryable</span><span class="Special">[TrainTrip]</span>
+        <span class="Statement">val</span> backend = <span class="Statement">new</span> <span class="Special">SlickBackend</span>(scala.slick.driver.<span class="Special">H2Driver</span>, <span class="Special">AnnotationMapper</span>)
+
+        <span class="Statement">val</span> australianTrips = <span class="Statement">for</span> {
+            t <span class="Statement">&lt;-</span> trips <span class="Statement">if</span> t.countryID == <span class="Constant">1</span>
+        } <span class="Statement">yield</span> (t.name, t.price)
+
+        backend
+            .result(australianTrips, threadLocalSession)
+            .foreach {
+                <span class="Statement">case</span>(name, price) <span class="Statement">=&gt;</span> println(name + <span class="Constant">&quot;: &quot;</span> + price)
+            }
+
+        <span class="Statement">val</span> implicitTrips = <span class="Special">ImplicitQueryable</span>(<span class="Special">Queryable</span><span class="Special">[TrainTrip]</span>, backend, threadLocalSession)
+        implicitTrips.toSeq.foreach(t <span class="Statement">=&gt;</span> println(t.name))
+
+        implicitTrips.toSeq.sortBy(t <span class="Statement">=&gt;</span> t.price).foreach(t <span class="Statement">=&gt;</span> println(t.name + <span class="Constant">&quot;: &quot;</span> + t.price))
+
+        println( implicitTrips.length)
+    }
+}
+</pre>
+</body>
+</html>

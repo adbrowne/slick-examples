@@ -1,0 +1,70 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>~/scala/slick-examples/src/main/scala/scala/slick/examples/presentation/Lifted.scala.html</title>
+<meta name="Generator" content="Vim/7.3">
+<meta name="plugin-version" content="vim7.3_v6">
+<meta name="syntax" content="scala">
+<meta name="settings" content="use_css">
+<style type="text/css">
+<!--
+pre { font-family: monospace; color: #000000; background-color: #ffffff; }
+body { font-family: monospace; color: #000000; background-color: #ffffff; }
+.Identifier { color: #008080; }
+.Constant { color: #c00000; }
+.Special { color: #c000c0; }
+.Statement { color: #af5f00; }
+.Comment { color: #0000c0; }
+.PreProc { color: #c000c0; }
+-->
+</style>
+</head>
+<body>
+<pre>
+<span class="PreProc">package</span> scala.slick.example.presentation
+
+<span class="Comment">// Use H2Driver to connect to an H2 database</span>
+<span class="Comment">// Use H2Driver to connect to an H2 database</span>
+<span class="PreProc">import</span> scala.slick.driver.H2Driver.simple._
+
+<span class="Comment">// Use the implicit threadLocalSession</span>
+<span class="PreProc">import</span> Database.threadLocalSession
+
+<span class="PreProc">import</span> scala.slick.direct._
+
+<span class="Comment">// Use the implicit threadLocalSession</span>
+<span class="PreProc">import</span> Database.threadLocalSession
+<span class="PreProc">import</span> scala.slick.direct.AnnotationMapper._
+
+<span class="Statement">object</span> <span class="Special">Lifted</span> <span class="Statement">extends</span> <span class="Special">App</span> {
+
+    <span class="Statement">val</span> TrainTrips = <span class="Statement">new</span> <span class="Special">Table</span><span class="Special">[(String, Double, Int)]</span>(<span class="Constant">&quot;TrainTrips&quot;</span>) {
+        <span class="Statement">def</span> <span class="Identifier">name</span> = column[<span class="Special">String</span>](<span class="Constant">&quot;NAME&quot;</span>)
+        <span class="Statement">def</span> <span class="Identifier">price</span> = column[<span class="Special">Double</span>](<span class="Constant">&quot;PRICE&quot;</span>)
+        <span class="Statement">def</span> <span class="Identifier">countryID</span> = column[<span class="Special">Int</span>](<span class="Constant">&quot;FK_COUNTRY_ID&quot;</span>)
+        <span class="Statement">def</span> <span class="Identifier">*</span> = name ~ price ~ countryID
+    }
+
+    Database.forURL(<span class="Constant">&quot;jdbc:h2:mem:test1;TRACE_LEVEL_FILE=4&quot;</span>, driver = <span class="Constant">&quot;org.h2.Driver&quot;</span>) withSession {
+
+        (TrainTrips.ddl).create
+
+        TrainTrips.insertAll(
+                (<span class="Constant">&quot;Melbourne-Bendigo&quot;</span>, <span class="Constant">13.90</span>, <span class="Constant">1</span>),
+                (<span class="Constant">&quot;The Ghan&quot;</span>, <span class="Constant">1421</span>, <span class="Constant">1</span>),
+                (<span class="Constant">&quot;Indian Pacific&quot;</span>, <span class="Constant">408</span>, <span class="Constant">1</span>),
+                (<span class="Constant">&quot;Glacier Express&quot;</span>, <span class="Constant">142.8</span>, <span class="Constant">2</span>),
+                (<span class="Constant">&quot;Bernina Express&quot;</span>, <span class="Constant">118</span>, <span class="Constant">2</span>),
+                (<span class="Constant">&quot;Trans Siberain&quot;</span>, <span class="Constant">805</span>, <span class="Constant">3</span>))
+
+        <span class="Statement">val</span> australianTrips = <span class="Statement">for</span> {
+            t <span class="Statement">&lt;-</span> <span class="Special">TrainTrips</span> <span class="Statement">if</span> t.countryID === <span class="Constant">1</span>
+        } <span class="Statement">yield</span> (t.name, t.price)
+
+        australianTrips.foreach { <span class="Statement">case</span>(name, price) <span class="Statement">=&gt;</span> println(name + <span class="Constant">&quot;: &quot;</span> + price) }
+    }
+}
+</pre>
+</body>
+</html>
