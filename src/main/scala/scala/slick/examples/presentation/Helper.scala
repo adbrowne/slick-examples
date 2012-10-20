@@ -1,9 +1,6 @@
-package scala.slick.example.presentation
+package scala.slick.examples.presentation
 
-// Use H2Driver to connect to an H2 database
-// Use H2Driver to connect to an H2 database
 import scala.slick.driver.H2Driver.simple._
-
 // Use the implicit threadLocalSession
 import Database.threadLocalSession
 
@@ -13,19 +10,17 @@ import scala.slick.direct._
 import Database.threadLocalSession
 import scala.slick.direct.AnnotationMapper._
 
-object Lifted extends App {
+object Helper {
+	def createDb {
 
-  val TrainTrips = new Table[(String, Double, Int)]("TrainTrips") {
-    def name = column[String]("NAME")
+	    val TrainTrips = new Table[(String, Double, Int)]("TrainTrips") {
+	    def name = column[String]("NAME")
     def price = column[Double]("PRICE")
     def countryID = column[Int]("FK_COUNTRY_ID")
     def * = name ~ price ~ countryID
   }
   
-  Database.forURL("jdbc:h2:mem:test1;TRACE_LEVEL_FILE=4", driver = "org.h2.Driver") withSession {
-
-    var blah = (TrainTrips.ddl)
-    blah.create
+    (TrainTrips.ddl).create
     
     TrainTrips.insertAll(
       ("Melbourne-Bendigo", 13.90, 1),
@@ -35,11 +30,5 @@ object Lifted extends App {
       ("Bernina Express", 118, 2),
       ("Trans Siberain", 805, 3))
       
-    val australianTrips = for {
-    	t <- TrainTrips if t.countryID === 1 
-    } yield (t.name, t.price)
-  
-    australianTrips.foreach { case(name, price) => println(name + ": " + price) }
-  }
-
+	}
 }
