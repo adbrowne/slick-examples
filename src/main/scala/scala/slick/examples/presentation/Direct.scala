@@ -45,5 +45,9 @@ object Direct extends App {
         implicitTrips.toSeq.sortBy(t => t.price).foreach(t => println(t.name + ": " + t.price)) 
 
         println( implicitTrips.length)
+        
+        val flatMapResult = implicitTrips.flatMap(e1 => implicitTrips.map(e2=>e1))
+        println("Flat Map Results")
+        flatMapResult.toSeq.foreach(t => println(t.name))
     }
 }
