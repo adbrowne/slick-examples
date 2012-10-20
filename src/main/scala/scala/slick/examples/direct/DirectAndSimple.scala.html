@@ -1,0 +1,225 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>~/scala/slick-examples/src/main/scala/scala/slick/examples/direct/DirectAndSimple.scala.html</title>
+<meta name="Generator" content="Vim/7.3">
+<meta name="plugin-version" content="vim7.3_v6">
+<meta name="syntax" content="scala">
+<meta name="settings" content="use_css">
+<style type="text/css">
+<!--
+pre { font-family: monospace; color: #000000; background-color: #ffffff; }
+body { font-family: monospace; color: #000000; background-color: #ffffff; }
+.Type { color: #008000; }
+.Identifier { color: #008080; }
+.Constant { color: #c00000; }
+.Special { color: #c000c0; }
+.Statement { color: #af5f00; }
+.Comment { color: #0000c0; }
+.PreProc { color: #c000c0; }
+-->
+</style>
+</head>
+<body>
+<pre>
+<span class="PreProc">package</span> scala.slick.example.direct
+
+<span class="Comment">// Use H2Driver to connect to an H2 database</span>
+<span class="Comment">// Use H2Driver to connect to an H2 database</span>
+<span class="PreProc">import</span> scala.slick.driver.H2Driver.simple._
+
+<span class="Comment">// Use the implicit threadLocalSession</span>
+<span class="PreProc">import</span> Database.threadLocalSession
+
+<span class="PreProc">import</span> scala.slick.direct._
+
+<span class="Comment">// Use the implicit threadLocalSession</span>
+<span class="PreProc">import</span> Database.threadLocalSession
+<span class="PreProc">import</span> scala.slick.direct.AnnotationMapper._
+
+<span class="Statement">object</span> <span class="Special">DirectAndSimple</span> <span class="Statement">extends</span> <span class="Special">App</span> {
+
+  <span class="Comment">// Definition of the SUPPLIERS table</span>
+  <span class="Statement">object</span> <span class="Special">Suppliers</span> <span class="Statement">extends</span> <span class="Special">Table</span><span class="Special">[(Int, String, String, String, String, String)]</span>(<span class="Constant">&quot;SUPPLIERS&quot;</span>) {
+    <span class="Statement">def</span> <span class="Identifier">id</span> = column[<span class="Special">Int</span>](<span class="Constant">&quot;SUP_ID&quot;</span>, O.<span class="Special">PrimaryKey</span>) <span class="Comment">// This is the primary key column</span>
+    <span class="Statement">def</span> <span class="Identifier">name</span> = column[<span class="Special">String</span>](<span class="Constant">&quot;SUP_NAME&quot;</span>)
+    <span class="Statement">def</span> <span class="Identifier">street</span> = column[<span class="Special">String</span>](<span class="Constant">&quot;STREET&quot;</span>)
+    <span class="Statement">def</span> <span class="Identifier">city</span> = column[<span class="Special">String</span>](<span class="Constant">&quot;CITY&quot;</span>)
+    <span class="Statement">def</span> <span class="Identifier">state</span> = column[<span class="Special">String</span>](<span class="Constant">&quot;STATE&quot;</span>)
+    <span class="Statement">def</span> <span class="Identifier">zip</span> = column[<span class="Special">String</span>](<span class="Constant">&quot;ZIP&quot;</span>)
+    <span class="Comment">// Every table needs a * projection with the same type as the table's type parameter</span>
+    <span class="Statement">def</span> <span class="Identifier">*</span> = id ~ name ~ street ~ city ~ state ~ zip
+  }
+
+  <span class="Comment">// Definition of the COFFEES table</span>
+  <span class="Statement">object</span> <span class="Special">Coffees</span> <span class="Statement">extends</span> <span class="Special">Table</span><span class="Special">[(String, Int, Double, Int, Int)]</span>(<span class="Constant">&quot;COFFEES&quot;</span>) {
+    <span class="Statement">def</span> <span class="Identifier">name</span> = column[<span class="Special">String</span>](<span class="Constant">&quot;COF_NAME&quot;</span>, O.<span class="Special">PrimaryKey</span>)
+    <span class="Statement">def</span> <span class="Identifier">supID</span> = column[<span class="Special">Int</span>](<span class="Constant">&quot;SUP_ID&quot;</span>)
+    <span class="Statement">def</span> <span class="Identifier">price</span> = column[<span class="Special">Double</span>](<span class="Constant">&quot;PRICE&quot;</span>)
+    <span class="Statement">def</span> <span class="Identifier">sales</span> = column[<span class="Special">Int</span>](<span class="Constant">&quot;SALES&quot;</span>)
+    <span class="Statement">def</span> <span class="Identifier">total</span> = column[<span class="Special">Int</span>](<span class="Constant">&quot;TOTAL&quot;</span>)
+    <span class="Statement">def</span> <span class="Identifier">*</span> = name ~ supID ~ price ~ sales ~ total
+    <span class="Comment">// A reified foreign key relation that can be navigated to create a join</span>
+    <span class="Statement">def</span> <span class="Identifier">supplier</span> = foreignKey(<span class="Constant">&quot;SUP_FK&quot;</span>, supID, <span class="Special">Suppliers</span>)(<span class="Statement">_</span>.id)
+  }
+
+  @table(<span class="Constant">&quot;COFFEES&quot;</span>) <span class="Statement">case</span> <span class="Statement">class</span> <span class="Special">Coffee</span>(
+    @column(<span class="Constant">&quot;COF_NAME&quot;</span>) name:<span class="Type"> String</span>,
+    @column(<span class="Constant">&quot;SUP_ID&quot;</span>) supID:<span class="Type"> Int</span>,
+    @column(<span class="Constant">&quot;PRICE&quot;</span>) price:<span class="Type"> Double</span>)
+
+  <span class="Comment">// Connect to the database and execute the following block within a session</span>
+  Database.forURL(<span class="Constant">&quot;jdbc:h2:mem:test1;TRACE_LEVEL_FILE=4&quot;</span>, driver = <span class="Constant">&quot;org.h2.Driver&quot;</span>) withSession {
+
+    (Suppliers.ddl ++ Coffees.ddl).create
+
+    <span class="Comment">// Insert some suppliers</span>
+    Suppliers.insert(<span class="Constant">101</span>, <span class="Constant">&quot;Acme, Inc.&quot;</span>, <span class="Constant">&quot;99 Market Street&quot;</span>, <span class="Constant">&quot;Groundsville&quot;</span>, <span class="Constant">&quot;CA&quot;</span>, <span class="Constant">&quot;95199&quot;</span>)
+    Suppliers.insert(<span class="Constant">49</span>, <span class="Constant">&quot;Superior Coffee&quot;</span>, <span class="Constant">&quot;1 Party Place&quot;</span>, <span class="Constant">&quot;Mendocino&quot;</span>, <span class="Constant">&quot;CA&quot;</span>, <span class="Constant">&quot;95460&quot;</span>)
+    Suppliers.insert(<span class="Constant">150</span>, <span class="Constant">&quot;The High Ground&quot;</span>, <span class="Constant">&quot;100 Coffee Lane&quot;</span>, <span class="Constant">&quot;Meadows&quot;</span>, <span class="Constant">&quot;CA&quot;</span>, <span class="Constant">&quot;93966&quot;</span>)
+
+    <span class="Comment">// Insert some coffees (using JDBC's batch insert feature, if supported by the DB)</span>
+    Coffees.insertAll(
+      (<span class="Constant">&quot;Colombian&quot;</span>, <span class="Constant">101</span>, <span class="Constant">7.99</span>, <span class="Constant">0</span>, <span class="Constant">0</span>),
+      (<span class="Constant">&quot;French_Roast&quot;</span>, <span class="Constant">49</span>, <span class="Constant">8.99</span>, <span class="Constant">0</span>, <span class="Constant">0</span>),
+      (<span class="Constant">&quot;Espresso&quot;</span>, <span class="Constant">150</span>, <span class="Constant">9.99</span>, <span class="Constant">0</span>, <span class="Constant">0</span>),
+      (<span class="Constant">&quot;Colombian_Decaf&quot;</span>, <span class="Constant">101</span>, <span class="Constant">8.99</span>, <span class="Constant">0</span>, <span class="Constant">0</span>),
+      (<span class="Constant">&quot;French_Roast_Decaf&quot;</span>, <span class="Constant">49</span>, <span class="Constant">9.99</span>, <span class="Constant">0</span>, <span class="Constant">0</span>))
+
+    <span class="Comment">// Iterate through all coffees and output them</span>
+    <span class="Comment">//    println(&quot;Coffees:&quot;)</span>
+    <span class="Comment">//    Query(Coffees) foreach { case (name, supID, price, sales, total) =&gt;</span>
+    <span class="Comment">//      println(&quot;  &quot; + name + &quot;\t&quot; + supID + &quot;\t&quot; + price + &quot;\t&quot; + sales + &quot;\t&quot; + total)</span>
+    <span class="Comment">//    }</span>
+
+    <span class="Statement">val</span> coffees = <span class="Special">Queryable</span><span class="Special">[Coffee]</span>
+
+    <span class="Statement">val</span> l2 = coffees.withFilter(c <span class="Statement">=&gt;</span> c.supID == <span class="Constant">101</span>).map(c <span class="Statement">=&gt;</span> c.name)
+
+    <span class="Statement">val</span> l3 = l2.filter(c <span class="Statement">=&gt;</span> c == <span class="Constant">&quot;Colombian&quot;</span>) <span class="Comment">//{case (&quot;Colombian&quot;, _, _ ) =&gt; true } </span>
+
+    <span class="Statement">val</span> l4 = l2.filter { <span class="Statement">case</span> <span class="Constant">&quot;Colombian&quot;</span> <span class="Statement">=&gt;</span> <span class="Constant">true</span> }
+
+    <span class="Statement">val</span> l5 = l2.length
+
+    <span class="Statement">val</span> l = <span class="Statement">for</span> {
+      c <span class="Statement">&lt;-</span> coffees <span class="Statement">if</span> c.supID == <span class="Constant">101</span>
+      <span class="Comment">//                       ^ comparing Int to Int!</span>
+    } <span class="Statement">yield</span> (c.name, c.price, c)
+
+    println(<span class="Constant">&quot;Output Query results&quot;</span>)
+    <span class="Statement">val</span> q2 = coffees.map(c <span class="Statement">=&gt;</span> c.name)
+    <span class="Comment">// execute query using a chosen db backend</span>
+    <span class="Statement">val</span> backend = <span class="Statement">new</span> <span class="Special">SlickBackend</span>(scala.slick.driver.<span class="Special">H2Driver</span>, <span class="Special">AnnotationMapper</span>)
+    <span class="Comment">//backend.result(l2, threadLocalSession)</span>
+    <span class="Comment">//  .foreach { case (name, price, c) =&gt; println(name + &quot;: &quot; + price * 2 + &quot; &quot; + c.supID) }</span>
+
+    <span class="Comment">// backend.result(q2, threadLocalSession).foreach { case name =&gt; println(name) }</span>
+    println(backend.result(l5, threadLocalSession))
+  }
+
+  <span class="Comment">/*</span>
+<span class="Comment">// Definition of the SUPPLIERS table</span>
+<span class="Comment">  object Suppliers extends Table[(Int, String, String, String, String, String)](&quot;SUPPLIERS&quot;) {</span>
+<span class="Comment">    def id = column[Int](&quot;SUP_ID&quot;, O.PrimaryKey) // This is the primary key column</span>
+<span class="Comment">    def name = column[String](&quot;SUP_NAME&quot;)</span>
+<span class="Comment">    def street = column[String](&quot;STREET&quot;)</span>
+<span class="Comment">    def city = column[String](&quot;CITY&quot;)</span>
+<span class="Comment">    def state = column[String](&quot;STATE&quot;)</span>
+<span class="Comment">    def zip = column[String](&quot;ZIP&quot;)</span>
+<span class="Comment">    // Every table needs a * projection with the same type as the table's type parameter</span>
+<span class="Comment">    def * = id ~ name ~ street ~ city ~ state ~ zip</span>
+<span class="Comment">  }</span>
+
+<span class="Comment">  // Definition of the COFFEES table</span>
+<span class="Comment">  object Coffees extends Table[(String, Int, Double, Int, Int)](&quot;COFFEES&quot;) {</span>
+<span class="Comment">    def name = column[String](&quot;COF_NAME&quot;, O.PrimaryKey)</span>
+<span class="Comment">    def supID = column[Int](&quot;SUP_ID&quot;)</span>
+<span class="Comment">    def price = column[Double](&quot;PRICE&quot;)</span>
+<span class="Comment">    def sales = column[Int](&quot;SALES&quot;)</span>
+<span class="Comment">    def total = column[Int](&quot;TOTAL&quot;)</span>
+<span class="Comment">    def * = name ~ supID ~ price ~ sales ~ total</span>
+<span class="Comment">    // A reified foreign key relation that can be navigated to create a join</span>
+<span class="Comment">    def supplier = foreignKey(&quot;SUP_FK&quot;, supID, Suppliers)(_.id)</span>
+<span class="Comment">  }</span>
+
+<span class="Comment">  // Connect to the database and execute the following block within a session</span>
+<span class="Comment">  Database.forURL(&quot;jdbc:h2:mem:test1&quot;, driver = &quot;org.h2.Driver&quot;) withSession {</span>
+<span class="Comment">    // The session is never named explicitly. It is bound to the current</span>
+<span class="Comment">    // thread as the threadLocalSession that we imported</span>
+
+<span class="Comment">    // Create the tables, including primary and foreign keys</span>
+<span class="Comment">    (Suppliers.ddl ++ Coffees.ddl).create</span>
+
+<span class="Comment">    // Insert some suppliers</span>
+<span class="Comment">    Suppliers.insert(101, &quot;Acme, Inc.&quot;,      &quot;99 Market Street&quot;, &quot;Groundsville&quot;, &quot;CA&quot;, &quot;95199&quot;)</span>
+<span class="Comment">    Suppliers.insert( 49, &quot;Superior Coffee&quot;, &quot;1 Party Place&quot;,    &quot;Mendocino&quot;,    &quot;CA&quot;, &quot;95460&quot;)</span>
+<span class="Comment">    Suppliers.insert(150, &quot;The High Ground&quot;, &quot;100 Coffee Lane&quot;,  &quot;Meadows&quot;,      &quot;CA&quot;, &quot;93966&quot;)</span>
+
+<span class="Comment">    // Insert some coffees (using JDBC's batch insert feature, if supported by the DB)</span>
+<span class="Comment">    Coffees.insertAll(</span>
+<span class="Comment">      (&quot;Colombian&quot;,         101, 7.99, 0, 0),</span>
+<span class="Comment">      (&quot;French_Roast&quot;,       49, 8.99, 0, 0),</span>
+<span class="Comment">      (&quot;Espresso&quot;,          150, 9.99, 0, 0),</span>
+<span class="Comment">      (&quot;Colombian_Decaf&quot;,   101, 8.99, 0, 0),</span>
+<span class="Comment">      (&quot;French_Roast_Decaf&quot;, 49, 9.99, 0, 0)</span>
+<span class="Comment">    )</span>
+
+<span class="Comment">    // Iterate through all coffees and output them</span>
+<span class="Comment">    println(&quot;Coffees:&quot;)</span>
+<span class="Comment">    Query(Coffees) foreach { case (name, supID, price, sales, total) =&gt;</span>
+<span class="Comment">      println(&quot;  &quot; + name + &quot;\t&quot; + supID + &quot;\t&quot; + price + &quot;\t&quot; + sales + &quot;\t&quot; + total)</span>
+<span class="Comment">    }</span>
+
+<span class="Comment">    // Why not let the database do the string conversion and concatenation?</span>
+<span class="Comment">    println(&quot;Coffees (concatenated by DB):&quot;)</span>
+<span class="Comment">    val q1 = for(c &lt;- Coffees) // Coffees lifted automatically to a Query</span>
+<span class="Comment">      yield ConstColumn(&quot;  &quot;) ++ c.name ++ &quot;\t&quot; ++ c.supID.asColumnOf[String] ++</span>
+<span class="Comment">        &quot;\t&quot; ++ c.price.asColumnOf[String] ++ &quot;\t&quot; ++ c.sales.asColumnOf[String] ++</span>
+<span class="Comment">        &quot;\t&quot; ++ c.total.asColumnOf[String]</span>
+<span class="Comment">    // The first string constant needs to be lifted manually to a ConstColumn</span>
+<span class="Comment">    // so that the proper ++ operator is found</span>
+<span class="Comment">    q1 foreach println</span>
+
+<span class="Comment">    // Perform a join to retrieve coffee names and supplier names for</span>
+<span class="Comment">    // all coffees costing less than $9.00</span>
+<span class="Comment">    println(&quot;Manual join:&quot;)</span>
+<span class="Comment">    val q2 = for {</span>
+<span class="Comment">      c &lt;- Coffees if c.price &lt; 9.0</span>
+<span class="Comment">      s &lt;- Suppliers if s.id === c.supID</span>
+<span class="Comment">    } yield (c.name, s.name)</span>
+<span class="Comment">    for(t &lt;- q2) println(&quot;  &quot; + t._1 + &quot; supplied by &quot; + t._2)</span>
+
+<span class="Comment">    // Do the same thing using the navigable foreign key</span>
+<span class="Comment">    println(&quot;Join by foreign key:&quot;)</span>
+<span class="Comment">    val q3 = for {</span>
+<span class="Comment">      c &lt;- Coffees if c.price &lt; 9.0</span>
+<span class="Comment">      s &lt;- c.supplier</span>
+<span class="Comment">    } yield (c.name, s.name)</span>
+<span class="Comment">    // This time we read the result set into a List</span>
+<span class="Comment">    val l3: List[(String, String)] = q3.list</span>
+<span class="Comment">    for((s1, s2) &lt;- l3) println(&quot;  &quot; + s1 + &quot; supplied by &quot; + s2)</span>
+
+<span class="Comment">    // Check the SELECT statement for that query</span>
+<span class="Comment">    println(q3.selectStatement)</span>
+
+<span class="Comment">    // Compute the number of coffees by each supplier</span>
+<span class="Comment">    println(&quot;Coffees per supplier:&quot;)</span>
+<span class="Comment">    val q4 = (for {</span>
+<span class="Comment">      c &lt;- Coffees</span>
+<span class="Comment">      s &lt;- c.supplier</span>
+<span class="Comment">    } yield (c, s)).groupBy(_._2.id).map {</span>
+<span class="Comment">      case (_, q) =&gt; (q.map(_._2.name).min.get, q.length)</span>
+<span class="Comment">    }</span>
+<span class="Comment">    // .get is needed because SLICK cannot enforce statically that</span>
+<span class="Comment">    // the supplier is always available (being a non-nullable foreign key),</span>
+<span class="Comment">    // thus wrapping it in an Option</span>
+<span class="Comment">    q4 foreach { case (name, count) =&gt;</span>
+<span class="Comment">      println(&quot;  &quot; + name + &quot;: &quot; + count)</span>
+<span class="Comment">    }</span>
+<span class="Comment">    */</span>
+}
+</pre>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>~/scala/slick-examples/src/main/scala/scala/slick/examples/lifted/FirstExample.scala.html</title>
+<meta name="Generator" content="Vim/7.3">
+<meta name="plugin-version" content="vim7.3_v6">
+<meta name="syntax" content="scala">
+<meta name="settings" content="use_css">
+<style type="text/css">
+<!--
+pre { font-family: monospace; color: #000000; background-color: #ffffff; }
+body { font-family: monospace; color: #000000; background-color: #ffffff; }
+.Type { color: #008000; }
+.Identifier { color: #008080; }
+.Constant { color: #c00000; }
+.Special { color: #c000c0; }
+.Statement { color: #af5f00; }
+.Comment { color: #0000c0; }
+.PreProc { color: #c000c0; }
+-->
+</style>
+</head>
+<body>
+<pre>
+<span class="PreProc">package</span> scala.slick.examples.lifted
+
+<span class="Comment">// Use H2Driver to connect to an H2 database</span>
+<span class="PreProc">import</span> scala.slick.driver.H2Driver.simple._
+
+<span class="Comment">// Use the implicit threadLocalSession</span>
+<span class="PreProc">import</span> Database.threadLocalSession
+
+<span class="Comment">/**</span>
+<span class="Comment"> * A simple example that uses statically typed queries against an in-memory</span>
+<span class="Comment"> * H2 database. The example data comes from Oracle's JDBC tutorial at</span>
+<span class="Comment"> * <a href="http://download.oracle.com/javase/tutorial/jdbc/basics/tables.html.">http://download.oracle.com/javase/tutorial/jdbc/basics/tables.html.</a></span>
+<span class="Comment"> */</span>
+<span class="Statement">object</span> <span class="Special">FirstExample</span> <span class="Statement">extends</span> <span class="Special">App</span> {
+
+  <span class="Comment">// Definition of the SUPPLIERS table</span>
+  <span class="Statement">object</span> <span class="Special">Suppliers</span> <span class="Statement">extends</span> <span class="Special">Table</span><span class="Special">[(Int, String, String, String, String, String)]</span>(<span class="Constant">&quot;SUPPLIERS&quot;</span>) {
+    <span class="Statement">def</span> <span class="Identifier">id</span> = column[<span class="Special">Int</span>](<span class="Constant">&quot;SUP_ID&quot;</span>, O.<span class="Special">PrimaryKey</span>) <span class="Comment">// This is the primary key column</span>
+    <span class="Statement">def</span> <span class="Identifier">name</span> = column[<span class="Special">String</span>](<span class="Constant">&quot;SUP_NAME&quot;</span>)
+    <span class="Statement">def</span> <span class="Identifier">street</span> = column[<span class="Special">String</span>](<span class="Constant">&quot;STREET&quot;</span>)
+    <span class="Statement">def</span> <span class="Identifier">city</span> = column[<span class="Special">String</span>](<span class="Constant">&quot;CITY&quot;</span>)
+    <span class="Statement">def</span> <span class="Identifier">state</span> = column[<span class="Special">String</span>](<span class="Constant">&quot;STATE&quot;</span>)
+    <span class="Statement">def</span> <span class="Identifier">zip</span> = column[<span class="Special">String</span>](<span class="Constant">&quot;ZIP&quot;</span>)
+    <span class="Comment">// Every table needs a * projection with the same type as the table's type parameter</span>
+    <span class="Statement">def</span> <span class="Identifier">*</span> = id ~ name ~ street ~ city ~ state ~ zip
+  }
+
+  <span class="Comment">// Definition of the COFFEES table</span>
+  <span class="Statement">object</span> <span class="Special">Coffees</span> <span class="Statement">extends</span> <span class="Special">Table</span><span class="Special">[(String, Int, Double, Int, Int)]</span>(<span class="Constant">&quot;COFFEES&quot;</span>) {
+    <span class="Statement">def</span> <span class="Identifier">name</span> = column[<span class="Special">String</span>](<span class="Constant">&quot;COF_NAME&quot;</span>, O.<span class="Special">PrimaryKey</span>)
+    <span class="Statement">def</span> <span class="Identifier">supID</span> = column[<span class="Special">Int</span>](<span class="Constant">&quot;SUP_ID&quot;</span>)
+    <span class="Statement">def</span> <span class="Identifier">price</span> = column[<span class="Special">Double</span>](<span class="Constant">&quot;PRICE&quot;</span>)
+    <span class="Statement">def</span> <span class="Identifier">sales</span> = column[<span class="Special">Int</span>](<span class="Constant">&quot;SALES&quot;</span>)
+    <span class="Statement">def</span> <span class="Identifier">total</span> = column[<span class="Special">Int</span>](<span class="Constant">&quot;TOTAL&quot;</span>)
+    <span class="Statement">def</span> <span class="Identifier">*</span> = name ~ supID ~ price ~ sales ~ total
+    <span class="Comment">// A reified foreign key relation that can be navigated to create a join</span>
+    <span class="Statement">def</span> <span class="Identifier">supplier</span> = foreignKey(<span class="Constant">&quot;SUP_FK&quot;</span>, supID, <span class="Special">Suppliers</span>)(<span class="Statement">_</span>.id)
+  }
+
+  <span class="Comment">// Connect to the database and execute the following block within a session</span>
+  Database.forURL(<span class="Constant">&quot;jdbc:h2:mem:test1;TRACE_LEVEL_FILE=4&quot;</span>, driver = <span class="Constant">&quot;org.h2.Driver&quot;</span>) withSession {
+    <span class="Comment">// The session is never named explicitly. It is bound to the current</span>
+    <span class="Comment">// thread as the threadLocalSession that we imported</span>
+
+    <span class="Comment">// Create the tables, including primary and foreign keys</span>
+    (Suppliers.ddl ++ Coffees.ddl).create
+
+    <span class="Comment">// Insert some suppliers</span>
+    Suppliers.insert(<span class="Constant">101</span>, <span class="Constant">&quot;Acme, Inc.&quot;</span>,      <span class="Constant">&quot;99 Market Street&quot;</span>, <span class="Constant">&quot;Groundsville&quot;</span>, <span class="Constant">&quot;CA&quot;</span>, <span class="Constant">&quot;95199&quot;</span>)
+    Suppliers.insert( <span class="Constant">49</span>, <span class="Constant">&quot;Superior Coffee&quot;</span>, <span class="Constant">&quot;1 Party Place&quot;</span>,    <span class="Constant">&quot;Mendocino&quot;</span>,    <span class="Constant">&quot;CA&quot;</span>, <span class="Constant">&quot;95460&quot;</span>)
+    Suppliers.insert(<span class="Constant">150</span>, <span class="Constant">&quot;The High Ground&quot;</span>, <span class="Constant">&quot;100 Coffee Lane&quot;</span>,  <span class="Constant">&quot;Meadows&quot;</span>,      <span class="Constant">&quot;CA&quot;</span>, <span class="Constant">&quot;93966&quot;</span>)
+
+    <span class="Comment">// Insert some coffees (using JDBC's batch insert feature, if supported by the DB)</span>
+    Coffees.insertAll(
+      (<span class="Constant">&quot;Colombian&quot;</span>,         <span class="Constant">101</span>, <span class="Constant">7.99</span>, <span class="Constant">0</span>, <span class="Constant">0</span>),
+      (<span class="Constant">&quot;French_Roast&quot;</span>,       <span class="Constant">49</span>, <span class="Constant">8.99</span>, <span class="Constant">0</span>, <span class="Constant">0</span>),
+      (<span class="Constant">&quot;Espresso&quot;</span>,          <span class="Constant">150</span>, <span class="Constant">9.99</span>, <span class="Constant">0</span>, <span class="Constant">0</span>),
+      (<span class="Constant">&quot;Colombian_Decaf&quot;</span>,   <span class="Constant">101</span>, <span class="Constant">8.99</span>, <span class="Constant">0</span>, <span class="Constant">0</span>),
+      (<span class="Constant">&quot;French_Roast_Decaf&quot;</span>, <span class="Constant">49</span>, <span class="Constant">9.99</span>, <span class="Constant">0</span>, <span class="Constant">0</span>)
+    )
+
+    <span class="Comment">// Iterate through all coffees and output them</span>
+    println(<span class="Constant">&quot;Coffees:&quot;</span>)
+    <span class="Special">Query</span>(<span class="Special">Coffees</span>) foreach { <span class="Statement">case</span> (name, supID, price, sales, total) <span class="Statement">=&gt;</span>
+      println(<span class="Constant">&quot;  &quot;</span> + name + <span class="Constant">&quot;\t&quot;</span> + supID + <span class="Constant">&quot;\t&quot;</span> + price + <span class="Constant">&quot;\t&quot;</span> + sales + <span class="Constant">&quot;\t&quot;</span> + total)
+    }
+
+    <span class="Comment">// Why not let the database do the string conversion and concatenation?</span>
+    println(<span class="Constant">&quot;Coffees (concatenated by DB):&quot;</span>)
+    <span class="Statement">val</span> q1 = <span class="Statement">for</span>(c <span class="Statement">&lt;-</span> <span class="Special">Coffees</span>) <span class="Comment">// Coffees lifted automatically to a Query</span>
+      <span class="Statement">yield</span> <span class="Special">ConstColumn</span>(<span class="Constant">&quot;  &quot;</span>) ++ c.name ++ <span class="Constant">&quot;\t&quot;</span> ++ c.supID.asColumnOf[<span class="Special">String</span>] ++
+        <span class="Constant">&quot;\t&quot;</span> ++ c.price.asColumnOf[<span class="Special">String</span>] ++ <span class="Constant">&quot;\t&quot;</span> ++ c.sales.asColumnOf[<span class="Special">String</span>] ++
+        <span class="Constant">&quot;\t&quot;</span> ++ c.total.asColumnOf[<span class="Special">String</span>]
+    <span class="Comment">// The first string constant needs to be lifted manually to a ConstColumn</span>
+    <span class="Comment">// so that the proper ++ operator is found</span>
+    q1 foreach println
+
+    <span class="Comment">// Perform a join to retrieve coffee names and supplier names for</span>
+    <span class="Comment">// all coffees costing less than $9.00</span>
+    println(<span class="Constant">&quot;Manual join:&quot;</span>)
+    <span class="Statement">val</span> q2 = <span class="Statement">for</span> {
+      c <span class="Statement">&lt;-</span> <span class="Special">Coffees</span> <span class="Statement">if</span> c.price &lt; <span class="Constant">9.0</span>
+      s <span class="Statement">&lt;-</span> <span class="Special">Suppliers</span> <span class="Statement">if</span> s.id === c.supID
+    } <span class="Statement">yield</span> (c.name, s.name)
+    <span class="Statement">for</span>(t <span class="Statement">&lt;-</span> q2) println(<span class="Constant">&quot;  &quot;</span> + t._1 + <span class="Constant">&quot; supplied by &quot;</span> + t._2)
+
+    <span class="Comment">// Do the same thing using the navigable foreign key</span>
+    println(<span class="Constant">&quot;Join by foreign key:&quot;</span>)
+    <span class="Statement">val</span> q3 = <span class="Statement">for</span> {
+      c <span class="Statement">&lt;-</span> <span class="Special">Coffees</span> <span class="Statement">if</span> c.price &lt; <span class="Constant">9.0</span>
+      s <span class="Statement">&lt;-</span> c.supplier
+    } <span class="Statement">yield</span> (c.name, s.name)
+
+    println(<span class="Constant">&quot;running exists&quot;</span>)
+    <span class="Statement">val</span> qCustom = <span class="Statement">for</span> {
+        (c, index) <span class="Statement">&lt;-</span> Coffees.zipWithIndex
+      } <span class="Statement">yield</span> (index, c.name)
+
+    qCustom.foreach {
+      <span class="Statement">case</span> (index,name) <span class="Statement">=&gt;</span> println(index + <span class="Constant">&quot; &quot;</span> + name)
+    }
+
+    <span class="Comment">// This time we read the result set into a List</span>
+    <span class="Statement">val</span> l3:<span class="Type"> List[(String, String)]</span> = q3.list
+    <span class="Statement">for</span>((s1, s2) <span class="Statement">&lt;-</span> l3) println(<span class="Constant">&quot;  &quot;</span> + s1 + <span class="Constant">&quot; supplied by &quot;</span> + s2)
+
+    <span class="Comment">// Check the SELECT statement for that query</span>
+    println(q3.selectStatement)
+
+    <span class="Comment">// Compute the number of coffees by each supplier</span>
+    println(<span class="Constant">&quot;Coffees per supplier:&quot;</span>)
+    <span class="Statement">val</span> q4 = (<span class="Statement">for</span> {
+      c <span class="Statement">&lt;-</span> <span class="Special">Coffees</span>
+      s <span class="Statement">&lt;-</span> c.supplier
+    } <span class="Statement">yield</span> (c, s)).groupBy(<span class="Statement">_</span>._2.id).map {
+      <span class="Statement">case</span> (<span class="Statement">_</span>, q) <span class="Statement">=&gt;</span> (q.map(<span class="Statement">_</span>._2.name).min.get, q.length)
+    }
+    <span class="Comment">// .get is needed because SLICK cannot enforce statically that</span>
+    <span class="Comment">// the supplier is always available (being a non-nullable foreign key),</span>
+    <span class="Comment">// thus wrapping it in an Option</span>
+    q4 foreach { <span class="Statement">case</span> (name, count) <span class="Statement">=&gt;</span>
+      println(<span class="Constant">&quot;  &quot;</span> + name + <span class="Constant">&quot;: &quot;</span> + count)
+    }
+  }
+}
+</pre>
+</body>
+</html>
