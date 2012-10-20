@@ -70,18 +70,28 @@ object DirectAndSimple extends App {
 
     val coffees = Queryable[Coffee]
 
+    val l2 = coffees.withFilter(c => c.supID == 101).map(c => c.name)
+    
+    val l3 = l2.filter(c => c == "Colombian") //{case ("Colombian", _, _ ) => true } 
+    
+    val l4 = l2.filter { case "Colombian" => true }
+    
+    val l5 = l2.length
+    
     val l = for {
       c <- coffees if c.supID == 101
       //                       ^ comparing Int to Int!
     } yield (c.name, c.price, c)
 
+    println("Output Query results")
     val q2 = coffees.map(c => c.name)
     // execute query using a chosen db backend
     val backend = new SlickBackend(scala.slick.driver.H2Driver, AnnotationMapper)
-    backend.result(l, threadLocalSession)
-      .foreach { case (name, price, c) => println(name + ": " + price * 2 + " " + c.supID) }
+    //backend.result(l2, threadLocalSession)
+    //  .foreach { case (name, price, c) => println(name + ": " + price * 2 + " " + c.supID) }
 
-    backend.result(q2, threadLocalSession).foreach { case name => println(name) }
+    // backend.result(q2, threadLocalSession).foreach { case name => println(name) }
+    println(backend.result(l5, threadLocalSession))
   }
 
   /*

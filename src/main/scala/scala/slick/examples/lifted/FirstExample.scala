@@ -38,7 +38,7 @@ object FirstExample extends App {
   }
 
   // Connect to the database and execute the following block within a session
-  Database.forURL("jdbc:h2:mem:test1", driver = "org.h2.Driver") withSession {
+  Database.forURL("jdbc:h2:mem:test1;TRACE_LEVEL_FILE=4", driver = "org.h2.Driver") withSession {
     // The session is never named explicitly. It is bound to the current
     // thread as the threadLocalSession that we imported
 
@@ -90,6 +90,16 @@ object FirstExample extends App {
       c <- Coffees if c.price < 9.0
       s <- c.supplier
     } yield (c.name, s.name)
+    
+    println("running exists")
+    val qCustom = for { 
+    	(c, index) <- Coffees.zipWithIndex
+      } yield (index, c.name)
+      
+    qCustom.foreach {
+      case (index,name) => println(index + " " + name)
+    }
+    
     // This time we read the result set into a List
     val l3: List[(String, String)] = q3.list
     for((s1, s2) <- l3) println("  " + s1 + " supplied by " + s2)
