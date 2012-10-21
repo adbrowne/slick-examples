@@ -49,5 +49,13 @@ object Direct extends App {
         val flatMapResult = implicitTrips.flatMap(e1 => implicitTrips.map(e2=>e1))
         println("Flat Map Results")
         flatMapResult.toSeq.foreach(t => println(t.name))
+        
+        val flatMapped = for {
+          a <- implicitTrips
+          b <- implicitTrips
+          if a.countryID == 1
+        } yield (a.name, b.name)
+        
+        flatMapped.toSeq.foreach {case (a_name, b_name) => println(a_name + " " + b_name)}
     }
 }

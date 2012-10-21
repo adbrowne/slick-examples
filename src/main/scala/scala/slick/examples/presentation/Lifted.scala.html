@@ -63,6 +63,10 @@ body { font-family: monospace; color: #000000; background-color: #ffffff; }
         } <span class="Statement">yield</span> (t.name, t.price)
 
         australianTrips.foreach { <span class="Statement">case</span>(name, price) <span class="Statement">=&gt;</span> println(name + <span class="Constant">&quot;: &quot;</span> + price) }
+
+        <span class="Statement">val</span> wrong = <span class="Statement">for</span> {
+          t <span class="Statement">&lt;-</span> <span class="Special">TrainTrips</span> <span class="Statement">if</span> t.name.indexOf(<span class="Constant">&quot;c&quot;</span>) === <span class="Constant">3</span>
+        } <span class="Statement">yield</span> t
     }
 }
 </pre>

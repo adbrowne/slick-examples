@@ -39,5 +39,9 @@ object Lifted extends App {
         } yield (t.name, t.price)
 
         australianTrips.foreach { case(name, price) => println(name + ": " + price) }
+        
+//        val wrong = for {
+//          t <- TrainTrips if t.name.indexOf("c") === 3
+//        } yield t
     }
 }
