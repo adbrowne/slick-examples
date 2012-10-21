@@ -12,7 +12,7 @@ import scala.reflect.macros.Context
       import c.universe._
       c.universe.reify({
         println("Running filter")
-       new Queryable[T] 
+        new Queryable[T] 
       })
     }
     
