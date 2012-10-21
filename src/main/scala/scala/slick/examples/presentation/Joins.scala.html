@@ -45,6 +45,12 @@ body { font-family: monospace; color: #000000; background-color: #ffffff; }
         <span class="Statement">def</span> <span class="Identifier">*</span> = id ~ name
     }
 
+    <span class="Statement">def</span> <span class="Identifier">halfQuery</span>() = {
+        <span class="Statement">for</span> {
+            t <span class="Statement">&lt;-</span> <span class="Special">TrainTrips</span> <span class="Statement">if</span> t.countryID === <span class="Constant">1</span>
+        } <span class="Statement">yield</span> (t.name, t.price)
+    }
+
     <span class="Statement">val</span> TrainTrips = <span class="Statement">new</span> <span class="Special">Table</span><span class="Special">[(String, Double, Int)]</span>(<span class="Constant">&quot;TrainTrips&quot;</span>) {
         <span class="Statement">def</span> <span class="Identifier">name</span> = column[<span class="Special">String</span>](<span class="Constant">&quot;NAME&quot;</span>)
         <span class="Statement">def</span> <span class="Identifier">price</span> = column[<span class="Special">Double</span>](<span class="Constant">&quot;PRICE&quot;</span>)
@@ -100,6 +106,10 @@ body { font-family: monospace; color: #000000; background-color: #ffffff; }
 
         qCustom.foreach {
             <span class="Statement">case</span> (index,name) <span class="Statement">=&gt;</span> println(index + <span class="Constant">&quot; &quot;</span> + name)
+        }
+
+        <span class="Statement">val</span> composedQuery = <span class="Statement">for</span> {
+          t <span class="Statement">&lt;-</span> halfQuery() <span class="Statement">if</span> t._2 &gt; <span class="Constant">100.00</span>
         }
 
         <span class="Comment">// Compute the number of coffees by each supplier</span>

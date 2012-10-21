@@ -21,6 +21,12 @@ object Joins extends App {
 		def * = id ~ name
     }
     
+	def halfQuery() = {
+        for {
+            t <- TrainTrips if t.countryID === 1 
+        } yield (t.name, t.price)
+    }
+    
     val TrainTrips = new Table[(String, Double, Int)]("TrainTrips") {
         def name = column[String]("NAME")
         def price = column[Double]("PRICE")
@@ -76,6 +82,10 @@ object Joins extends App {
       
 	    qCustom.foreach {
 	    	case (index,name) => println(index + " " + name)
+	    }
+	  
+	    val composedQuery = for {
+	      t <- halfQuery() if t._2 > 100.00
 	    }
 	    
 	    // Compute the number of coffees by each supplier
