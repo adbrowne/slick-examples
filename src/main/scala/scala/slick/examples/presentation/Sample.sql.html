@@ -1,0 +1,27 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>~/scala/slick-examples/src/main/scala/scala/slick/examples/presentation/Sample.sql.html</title>
+<meta name="Generator" content="Vim/7.3">
+<meta name="plugin-version" content="vim7.3_v6">
+<meta name="syntax" content="sql">
+<meta name="settings" content="use_css">
+<style type="text/css">
+<!--
+pre { font-family: monospace; color: #000000; background-color: #ffffff; }
+body { font-family: monospace; color: #000000; background-color: #ffffff; }
+.Special { color: #c000c0; }
+.Constant { color: #c00000; }
+.Statement { color: #af5f00; }
+-->
+</style>
+</head>
+<body>
+<pre>
+<span class="Statement">select</span> x2.<span class="Constant">&quot;NAME&quot;</span>, x2.<span class="Constant">&quot;PRICE&quot;</span> <span class="Special">from</span> <span class="Constant">&quot;TrainTrips&quot;</span> x2 <span class="Special">where</span> x2.<span class="Constant">&quot;FK_COUNTRY_ID&quot;</span> = <span class="Constant">1</span>
+
+<span class="Statement">select</span> min(x2.<span class="Constant">&quot;NAME&quot;</span>), count(<span class="Constant">1</span>) <span class="Special">from</span> <span class="Constant">&quot;TrainTrips&quot;</span> x3, <span class="Constant">&quot;Countries&quot;</span> x2 <span class="Special">where</span> x2.<span class="Constant">&quot;COUNTRY_ID&quot;</span> = x3.<span class="Constant">&quot;FK_COUNTRY_ID&quot;</span> <span class="Special">group</span> <span class="Special">by</span> x2.<span class="Constant">&quot;COUNTRY_ID&quot;</span>
+</pre>
+</body>
+</html>

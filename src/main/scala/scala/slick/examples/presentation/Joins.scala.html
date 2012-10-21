@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>~/scala/slick-examples/src/main/scala/scala/slick/examples/presentation/Joins.scala.html</title>
+<meta name="Generator" content="Vim/7.3">
+<meta name="plugin-version" content="vim7.3_v6">
+<meta name="syntax" content="scala">
+<meta name="settings" content="use_css">
+<style type="text/css">
+<!--
+pre { font-family: monospace; color: #000000; background-color: #ffffff; }
+body { font-family: monospace; color: #000000; background-color: #ffffff; }
+.Identifier { color: #008080; }
+.Constant { color: #c00000; }
+.Special { color: #c000c0; }
+.Statement { color: #af5f00; }
+.Comment { color: #0000c0; }
+.PreProc { color: #c000c0; }
+-->
+</style>
+</head>
+<body>
+<pre>
+<span class="PreProc">package</span> scala.slick.example.presentation
+
+<span class="Comment">// Use H2Driver to connect to an H2 database</span>
+<span class="Comment">// Use H2Driver to connect to an H2 database</span>
+<span class="PreProc">import</span> scala.slick.driver.H2Driver.simple._
+
+<span class="Comment">// Use the implicit threadLocalSession</span>
+<span class="PreProc">import</span> Database.threadLocalSession
+
+<span class="PreProc">import</span> scala.slick.direct._
+
+<span class="Comment">// Use the implicit threadLocalSession</span>
+<span class="PreProc">import</span> Database.threadLocalSession
+<span class="PreProc">import</span> scala.slick.direct.AnnotationMapper._
+
+<span class="Statement">object</span> <span class="Special">Joins</span> <span class="Statement">extends</span> <span class="Special">App</span> {
+
+    <span class="Statement">val</span> Countries = <span class="Statement">new</span> <span class="Special">Table</span><span class="Special">[(Int, String)]</span>(<span class="Constant">&quot;Countries&quot;</span>) {
+        <span class="Statement">def</span> <span class="Identifier">id</span> = column[<span class="Special">Int</span>](<span class="Constant">&quot;COUNTRY_ID&quot;</span>, O.<span class="Special">PrimaryKey</span>) <span class="Comment">// This is the primary key column</span>
+        <span class="Statement">def</span> <span class="Identifier">name</span> = column[<span class="Special">String</span>](<span class="Constant">&quot;NAME&quot;</span>)
+        <span class="Statement">def</span> <span class="Identifier">*</span> = id ~ name
+    }
+
+    <span class="Statement">val</span> TrainTrips = <span class="Statement">new</span> <span class="Special">Table</span><span class="Special">[(String, Double, Int)]</span>(<span class="Constant">&quot;TrainTrips&quot;</span>) {
+        <span class="Statement">def</span> <span class="Identifier">name</span> = column[<span class="Special">String</span>](<span class="Constant">&quot;NAME&quot;</span>)
+        <span class="Statement">def</span> <span class="Identifier">price</span> = column[<span class="Special">Double</span>](<span class="Constant">&quot;PRICE&quot;</span>)
+        <span class="Statement">def</span> <span class="Identifier">countryID</span> = column[<span class="Special">Int</span>](<span class="Constant">&quot;FK_COUNTRY_ID&quot;</span>)
+        <span class="Statement">def</span> <span class="Identifier">*</span> = name ~ price ~ countryID
+        <span class="Statement">def</span> <span class="Identifier">country</span> = foreignKey(<span class="Constant">&quot;COUNTRY_ID&quot;</span>, countryID, <span class="Special">Countries</span>)(<span class="Statement">_</span>.id)
+    }
+
+    Database.forURL(<span class="Constant">&quot;jdbc:h2:mem:test1;TRACE_LEVEL_FILE=4&quot;</span>, driver = <span class="Constant">&quot;org.h2.Driver&quot;</span>) withSession {
+
+        (TrainTrips.ddl ++ Countries.ddl).create
+
+        Countries.insertAll(
+                (<span class="Constant">1</span>, <span class="Constant">&quot;Australia&quot;</span>),
+                (<span class="Constant">2</span>, <span class="Constant">&quot;Switzerland&quot;</span>),
+                (<span class="Constant">3</span>, <span class="Constant">&quot;Russia&quot;</span>))
+
+        TrainTrips.insertAll(
+                (<span class="Constant">&quot;Melbourne-Bendigo&quot;</span>, <span class="Constant">13.90</span>, <span class="Constant">1</span>),
+                (<span class="Constant">&quot;The Ghan&quot;</span>, <span class="Constant">1421</span>, <span class="Constant">1</span>),
+                (<span class="Constant">&quot;Indian Pacific&quot;</span>, <span class="Constant">408</span>, <span class="Constant">1</span>),
+                (<span class="Constant">&quot;Glacier Express&quot;</span>, <span class="Constant">142.8</span>, <span class="Constant">2</span>),
+                (<span class="Constant">&quot;Bernina Express&quot;</span>, <span class="Constant">118</span>, <span class="Constant">2</span>),
+                (<span class="Constant">&quot;Trans Siberain&quot;</span>, <span class="Constant">805</span>, <span class="Constant">3</span>))
+
+        <span class="Statement">val</span> australianTrips = <span class="Statement">for</span> {
+            t <span class="Statement">&lt;-</span> <span class="Special">TrainTrips</span> <span class="Statement">if</span> t.countryID === <span class="Constant">1</span>
+        } <span class="Statement">yield</span> (t.name, t.price)
+
+        println(<span class="Constant">&quot;Filtered Trips&quot;</span>)
+        australianTrips.foreach { <span class="Statement">case</span>(name, price) <span class="Statement">=&gt;</span> println(name + <span class="Constant">&quot;: &quot;</span> + price) }
+
+        println(<span class="Constant">&quot;Manual Join&quot;</span>)
+        <span class="Statement">val</span> manualJoin = <span class="Statement">for</span> {
+          t <span class="Statement">&lt;-</span> <span class="Special">TrainTrips</span>
+          c <span class="Statement">&lt;-</span> <span class="Special">Countries</span> <span class="Statement">if</span> c.id === t.countryID
+        } <span class="Statement">yield</span> (t.name, c.name)
+        <span class="Statement">for</span>(t <span class="Statement">&lt;-</span> manualJoin) println(<span class="Constant">&quot;  &quot;</span> + t._1 + <span class="Constant">&quot; country: &quot;</span> + t._2)
+
+        println(<span class="Constant">&quot;Join by foreign key:&quot;</span>)
+        <span class="Statement">val</span> foreignKeyJoin = <span class="Statement">for</span> {
+          t <span class="Statement">&lt;-</span> <span class="Special">TrainTrips</span>
+          c <span class="Statement">&lt;-</span> t.country
+        } <span class="Statement">yield</span> (t.name, c.name)
+        <span class="Statement">for</span>(t <span class="Statement">&lt;-</span> foreignKeyJoin) println(<span class="Constant">&quot;  &quot;</span> + t._1 + <span class="Constant">&quot; country: &quot;</span> + t._2)
+
+        println(foreignKeyJoin.selectStatement)
+
+        println(<span class="Constant">&quot;running exists&quot;</span>)
+        <span class="Statement">val</span> qCustom = <span class="Statement">for</span> {
+            (c, index) <span class="Statement">&lt;-</span> TrainTrips.zipWithIndex
+        } <span class="Statement">yield</span> (index, c.name)
+
+        qCustom.foreach {
+            <span class="Statement">case</span> (index,name) <span class="Statement">=&gt;</span> println(index + <span class="Constant">&quot; &quot;</span> + name)
+        }
+
+        <span class="Comment">// Compute the number of coffees by each supplier</span>
+    println(<span class="Constant">&quot;Trips per country:&quot;</span>)
+    <span class="Statement">val</span> tripsPerCountry = (<span class="Statement">for</span> {
+      t <span class="Statement">&lt;-</span> <span class="Special">TrainTrips</span>
+      c <span class="Statement">&lt;-</span> t.country
+    } <span class="Statement">yield</span> (c, c)).groupBy(<span class="Statement">_</span>._2.id).map {
+      <span class="Statement">case</span> (<span class="Statement">_</span>, q) <span class="Statement">=&gt;</span> (q.map(<span class="Statement">_</span>._2.name).min.get, q.length)
+    }
+    <span class="Comment">// .get is needed because SLICK cannot enforce statically that</span>
+    <span class="Comment">// the supplier is always available (being a non-nullable foreign key),</span>
+    <span class="Comment">// thus wrapping it in an Option</span>
+    tripsPerCountry foreach { <span class="Statement">case</span> (name, count) <span class="Statement">=&gt;</span>
+      println(<span class="Constant">&quot;  &quot;</span> + name + <span class="Constant">&quot;: &quot;</span> + count)
+    }
+    }
+}
+</pre>
+</body>
+</html>

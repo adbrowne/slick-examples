@@ -1,0 +1,56 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>~/scala/slick-examples/src/main/scala/scala/slick/examples/presentation/SqlString.scala.html</title>
+<meta name="Generator" content="Vim/7.3">
+<meta name="plugin-version" content="vim7.3_v6">
+<meta name="syntax" content="scala">
+<meta name="settings" content="use_css">
+<style type="text/css">
+<!--
+pre { font-family: monospace; color: #000000; background-color: #ffffff; }
+body { font-family: monospace; color: #000000; background-color: #ffffff; }
+.Constant { color: #c00000; }
+.Type { color: #008000; }
+.Special { color: #c000c0; }
+.Statement { color: #af5f00; }
+.PreProc { color: #c000c0; }
+-->
+</style>
+</head>
+<body>
+<pre>
+<span class="PreProc">package</span> scala.slick.example.presentation
+
+<span class="PreProc">import</span> scala.slick.session.Database
+<span class="PreProc">import</span> Database.threadLocalSession
+<span class="PreProc">import</span> scala.slick.jdbc.{GetResult, StaticQuery =&gt; Q}
+<span class="PreProc">import</span> Q.interpolation
+
+<span class="Statement">object</span> <span class="Special">SqlString</span> <span class="Statement">extends</span> <span class="Special">App</span> {
+
+    <span class="Statement">case</span> <span class="Statement">class</span> <span class="Special">TrainTrip</span>(
+        name:<span class="Type"> String</span>,
+        price:<span class="Type"> Double</span>,
+        countryID:<span class="Type"> Int</span>
+    )
+
+
+    Database.forURL(<span class="Constant">&quot;jdbc:h2:mem:test1;TRACE_LEVEL_FILE=4&quot;</span>, driver = <span class="Constant">&quot;org.h2.Driver&quot;</span>) withSession {
+
+        <span class="Statement">implicit</span> <span class="Statement">val</span> getTrainTripResult = <span class="Special">GetResult</span>(r <span class="Statement">=&gt;</span> <span class="Special">TrainTrip</span>(r.&lt;&lt;, r.&lt;&lt;, r.&lt;&lt;))
+
+        Q.updateNA(<span class="Constant">&quot;create table TrainTrips(&quot;</span>+
+            <span class="Constant">&quot;name varchar not null, &quot;</span>+
+            <span class="Constant">&quot;price double not null, &quot;</span>+
+            <span class="Constant">&quot;FK_COUNTRY_ID int not null)&quot;</span>).execute
+
+        <span class="Statement">val</span> q = Q.queryNA(<span class="Constant">&quot;select * from TrainTrips where FK_COUNTRY_ID = 1&quot;</span>)
+
+        q.foreach(println)
+    }
+}
+</pre>
+</body>
+</html>
