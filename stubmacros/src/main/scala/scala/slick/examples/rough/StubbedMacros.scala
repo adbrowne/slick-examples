@@ -10,18 +10,24 @@ import scala.reflect.macros.Context
       (c: scala.reflect.macros.Context)
       (projection: c.Expr[T => Boolean]): c.Expr[Queryable[T]] = {
       import c.universe._
-      c.universe.reify(new Queryable[T])
+      c.universe.reify({
+        println("Running filter")
+       new Queryable[T] 
+      })
     }
     
     def map[T:c.AbsTypeTag, S:c.AbsTypeTag]
       (c: scala.reflect.macros.Context)
       (projection: c.Expr[T => S]): c.Expr[Queryable[S]] = {
-      c.universe.reify(new Queryable[S])
+      c.universe.reify({
+       println("Running map")
+       new Queryable[S]
+      })
     }
   
   }
 
-  class Queryable[T] {
+class Queryable[T] {
 	def toSeq : Seq[T] = List()
     def filter(projection: T => Boolean): Queryable[T] = macro QueryableMacros.filter[T]
     def withFilter(projection: T => Boolean): Queryable[T] = macro QueryableMacros.filter[T]
@@ -30,4 +36,5 @@ import scala.reflect.macros.Context
 
   object Queryable {
     def apply[T: ru.TypeTag: ClassTag]() = new Queryable[T]()
+    //def apply[T]() = new Queryable[T]()
   }
