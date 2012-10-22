@@ -19,8 +19,16 @@ import scala.reflect.macros.Context
     def map[T:c.AbsTypeTag, S:c.AbsTypeTag]
       (c: scala.reflect.macros.Context)
       (projection: c.Expr[T => S]): c.Expr[Queryable[S]] = {
+      import c.universe._
+      val tree = projection.tree
+      val reifiedTree = c.reifyTree(c.runtimeUniverse, c.universe.EmptyTree, c.typeCheck(tree)).asInstanceOf[Tree]
+      val treeExpresssion = c.Expr[ru.Expr[T]](reifiedTree)
+      
       c.universe.reify({
+    	   val splicedExpression = treeExpresssion.splice
+        
        println("Running map")
+       println(splicedExpression)
        new Queryable[S]
       })
     }

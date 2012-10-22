@@ -20,6 +20,9 @@ object DirectRough extends App {
       trips.filter(c => c.countryID == 1)
       .map(t => (t.name, t.price))
     
+    val filterOnly = 
+      trips.filter(c => c.countryID == 1)
+      
     australianTrips.toSeq.foreach {
        case trip => println(trip._1)
     }
