@@ -10,8 +10,18 @@ import scala.reflect.macros.Context
       (c: scala.reflect.macros.Context)
       (projection: c.Expr[T => Boolean]): c.Expr[Queryable[T]] = {
       import c.universe._
+      val tree = projection.tree // take compile time tree
+      
+      // create tree that will be available at runtime
+      val reifiedTree = c.reifyTree(c.runtimeUniverse, c.universe.EmptyTree, c.typeCheck(tree)).asInstanceOf[Tree]
+      val treeExpresssion = c.Expr[ru.Expr[T]](reifiedTree)
+      
       c.universe.reify({
-        println("Running filter")
+        // splice is how we bring variables in
+    	   val splicedExpression = treeExpresssion.splice
+        
+       println("Running filter")
+       println(splicedExpression)
         new Queryable[T] 
       })
     }
@@ -20,11 +30,14 @@ import scala.reflect.macros.Context
       (c: scala.reflect.macros.Context)
       (projection: c.Expr[T => S]): c.Expr[Queryable[S]] = {
       import c.universe._
-      val tree = projection.tree
+      val tree = projection.tree // take compile time tree
+      
+      // create tree that will be available at runtime
       val reifiedTree = c.reifyTree(c.runtimeUniverse, c.universe.EmptyTree, c.typeCheck(tree)).asInstanceOf[Tree]
       val treeExpresssion = c.Expr[ru.Expr[T]](reifiedTree)
       
       c.universe.reify({
+        // splice is how we bring variables in
     	   val splicedExpression = treeExpresssion.splice
         
        println("Running map")
