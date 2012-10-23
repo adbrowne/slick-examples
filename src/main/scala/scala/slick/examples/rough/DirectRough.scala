@@ -9,6 +9,10 @@ object DirectRough extends App {
     price: Double,
     countryID: Int)
  
+    /* def localFilter(trip: DirectRough.TrainTrip) = {
+		trip.countryID == 1
+	} */
+  
     val trips = Queryable[TrainTrip]
 
     // val australianTrips = for {
@@ -17,13 +21,19 @@ object DirectRough extends App {
 
     // desugars to
     val australianTrips = 
-      trips.filter(c => c.countryID == 1)
+      (trips.filter(c => c.countryID == 1))
       .map(t => (t.name, t.price))
-    
+   /*
     val filterOnly = 
       trips.filter(c => c.countryID == 1)
+     
+    val filterInsideFile =
+      trips.filter(c => localFilter(c))
+     
+    val filterOutsideFile =
+      trips.filter(c => RoughHelper.myFilter(c))
       
     australianTrips.toSeq.foreach {
        case trip => println(trip._1)
-    }
+    }*/
 }

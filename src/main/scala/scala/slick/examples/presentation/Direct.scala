@@ -30,7 +30,7 @@ object Direct extends App {
         val backend = new SlickBackend(scala.slick.driver.H2Driver, AnnotationMapper)
 
         val australianTrips = for {
-            t <- trips if t.countryID == 1 
+            t <- trips if t.countryID.toString() == "1" 
         } yield (t.name, t.price)
 
         backend

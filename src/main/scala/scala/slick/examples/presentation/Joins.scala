@@ -77,10 +77,14 @@ object Joins extends App {
 	    
 	    println("running exists")
 	    val qCustom = for { 
-	    	(c, index) <- TrainTrips.zipWithIndex
+	    	(c, index) <- TrainTrips.zipWithIndex 
 	    } yield (index, c.name)
       
-	    qCustom.foreach {
+	    val qCustom2 = qCustom.filter(x => x match{
+	     case (index, name) => index > 3l 
+	    })
+	    
+	    qCustom2.foreach {
 	    	case (index,name) => println(index + " " + name)
 	    }
 	  

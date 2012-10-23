@@ -33,7 +33,7 @@ import scala.reflect.macros.Context
       val tree = projection.tree // take compile time tree
       
       // create tree that will be available at runtime
-      val reifiedTree = c.reifyTree(c.runtimeUniverse, c.universe.EmptyTree, c.typeCheck(tree)).asInstanceOf[Tree]
+      val reifiedTree = c.reifyTree(c.runtimeUniverse, c.universe.EmptyTree, c.typeCheck(tree))
       val treeExpresssion = c.Expr[ru.Expr[T]](reifiedTree)
       
       c.universe.reify({
@@ -52,7 +52,7 @@ class Queryable[T] {
 	def toSeq : Seq[T] = List()
     def filter(projection: T => Boolean): Queryable[T] = macro QueryableMacros.filter[T]
     def withFilter(projection: T => Boolean): Queryable[T] = macro QueryableMacros.filter[T]
-    def map[S]( projection: T => S ) : Queryable[S] = macro QueryableMacros.map[T,S]
+    def map[S]( projection: T => S ) : Queryable[S] = macro QueryableMacros.map[T,S] 
   }
 
   object Queryable {
